@@ -1,265 +1,439 @@
-import $ from '../../../core/renderer';
-import { isObject, isDefined } from '../../../core/utils/type';
-import { extend } from '../../../core/utils/extend';
-import { each } from '../../../core/utils/iterator';
-import { inArray } from '../../../core/utils/array';
-import { camelize } from '../../../core/utils/inflector';
-import registerComponent from '../../../core/component_registrator';
-import Widget from '../../widget/ui.widget';
-import { Navigator } from './navigator';
-import DropDownMenu from '../../drop_down_menu';
-import Tabs from '../../tabs';
-import { TABS_EXPANDED_CLASS } from '../../tabs/constants';
-import errors from '../../../core/errors';
-import messageLocalization from '../../../localization/message';
+// import $ from '../../../core/renderer';
+// import { isObject, isDefined } from '../../../core/utils/type';
+// import { extend } from '../../../core/utils/extend';
+// import { each } from '../../../core/utils/iterator';
+// import { inArray } from '../../../core/utils/array';
+// import { camelize } from '../../../core/utils/inflector';
+// import registerComponent from '../../../core/component_registrator';
+// import Widget from '../../widget/ui.widget';
+// import { Navigator } from './navigator';
+// import DropDownMenu from '../../drop_down_menu';
+// import Tabs from '../../tabs';
+// import Toolbar from '../../toolbar';
+// import { TABS_EXPANDED_CLASS } from '../../tabs/constants';
+// import errors from '../../../core/errors';
+// import messageLocalization from '../../../localization/message';
 
-const COMPONENT_CLASS = 'dx-scheduler-header';
-const VIEW_SWITCHER_CLASS = 'dx-scheduler-view-switcher';
-const VIEW_SWITCHER_LABEL_CLASS = 'dx-scheduler-view-switcher-label';
+// const COMPONENT_CLASS = 'dx-scheduler-header';
+// const VIEW_SWITCHER_CLASS = 'dx-scheduler-view-switcher';
+// const VIEW_SWITCHER_LABEL_CLASS = 'dx-scheduler-view-switcher-label';
 
-const STEP_MAP = {
-    day: 'day',
-    week: 'week',
-    workWeek: 'workWeek',
-    month: 'month',
-    timelineDay: 'day',
-    timelineWeek: 'week',
-    timelineWorkWeek: 'workWeek',
-    timelineMonth: 'month',
-    agenda: 'agenda'
-};
+// const STEP_MAP = {
+//     day: 'day',
+//     week: 'week',
+//     workWeek: 'workWeek',
+//     month: 'month',
+//     timelineDay: 'day',
+//     timelineWeek: 'week',
+//     timelineWorkWeek: 'workWeek',
+//     timelineMonth: 'month',
+//     agenda: 'agenda'
+// };
 
-const VIEWS = ['day', 'week', 'workWeek', 'month', 'timelineDay', 'timelineWeek', 'timelineWorkWeek', 'timelineMonth', 'agenda'];
+// const VIEWS = ['day', 'week', 'workWeek', 'month', 'timelineDay', 'timelineWeek', 'timelineWorkWeek', 'timelineMonth', 'agenda'];
 
-export class Header extends Widget {
-    _getDefaultOptions() {
-        return extend(super._getDefaultOptions(), {
-            views: [],
-            isAdaptive: false,
-            intervalCount: 1,
-            currentView: 'day',
-            firstDayOfWeek: undefined,
-            currentDate: new Date(),
-            min: undefined,
-            max: undefined,
-            useDropDownViewSwitcher: false,
-            _dropDownButtonIcon: 'overlay'
-        });
-    }
 
-    _setOptionsByReference() {
-        super._setOptionsByReference();
+// const _getItemText = (item) => {
+//     return item.name || messageLocalization.format('dxScheduler-switcher' + camelize(item.type || item, true));
+// };
 
-        extend(this._optionsByReference, {
-            currentView: true
-        });
-    }
+// // _createViewButtonGroupItem() {
+// //     const items = this.option('views').map(viewName => {
+// //         return {
+// //             key: viewName,
+// //             text: _getItemText(viewName)
+// //         };
+// //     });
 
-    _optionChanged(args) {
-        const value = args.value;
+// //     return {
+// //         location: 'after',
+// //         widget: 'dxButtonGroup',
+// //         locateInMenu: 'auto',
+// //         // locateInMenu: 'always',
+// //         options: {
+// //             keyExpr: 'key',
+// //             items: items,
+// //             selectedItemKeys: [this.option('currentView')],
+// //             focusStateEnabled: this.option('focusStateEnabled'),
 
-        switch(args.name) {
-            case 'views':
-                this._validateViews();
+// //             onItemClick: e => this.notifyObserver('currentViewUpdated', e.itemData.key)
+// //         }
+// //     };
+// // }
 
-                this._viewSwitcher.option({
-                    items: value,
-                    selectedItem: this.option('currentView')
-                });
-                break;
-            case 'customizeDateNavigatorText':
-                this._navigator.option(args.name, value);
-                break;
-            case 'currentView':
-                this._viewSwitcher.option('selectedItem', value);
-                this._navigator.option('step', STEP_MAP[this._getCurrentViewType()]);
-                this._changeViewSwitcherLabelText();
-                break;
-            case 'currentDate':
-                this._navigator.option('date', value);
-                break;
-            case 'displayedDate':
-                this._navigator.option('displayedDate', value);
-                break;
-            case 'min':
-            case 'max':
-            case 'firstDayOfWeek':
-            case 'intervalCount':
-                this._navigator.option(args.name, value);
-                break;
-            case 'tabIndex':
-            case 'focusStateEnabled':
-                this._viewSwitcher.option(args.name, value);
-                this._navigator.option(args.name, value);
-                super._optionChanged(args);
-                break;
-            case 'useDropDownViewSwitcher':
-                this._refreshViewSwitcher();
-                break;
-            default:
-                super._optionChanged(args);
-        }
-    }
+// const EVENT_NAMES = {
+//     CURRENT_VIEW_CHANGED: 'currentViewChanged',
+//     VIEWS_CHANGED: 'viewsChanged',
+//     TAB_INDEX_CHANGED: 'tabIndexChanged',
+//     USE_DROP_DOWN_VIEW_SWITCHER: 'useDropDownViewSwitcherChanged'
+// };
 
-    _init() {
-        super._init();
-        this.$element().addClass(COMPONENT_CLASS);
-    }
+// class ViewSwitcher {
+//     constructor(onViewClick,) {
 
-    _initMarkup() {
-        super._initMarkup();
+//     }
 
-        this._renderNavigator();
-        this._renderViewSwitcher();
-    }
+//     createItems() {
 
-    _renderNavigator() {
-        this._navigator = this._createComponent('<div>', Navigator, {
-            min: this.option('min'),
-            max: this.option('max'),
-            intervalCount: this.option('intervalCount'),
-            date: this.option('currentDate'),
-            step: STEP_MAP[this._getCurrentViewType()],
-            firstDayOfWeek: this.option('firstDayOfWeek'),
-            tabIndex: this.option('tabIndex'),
-            focusStateEnabled: this.option('focusStateEnabled'),
-            observer: this.option('observer'),
-            customizeDateNavigatorText: this.option('customizeDateNavigatorText'),
-            todayDate: this.option('todayDate')
-        });
+//     }
+// }
 
-        this._navigator.$element().appendTo(this.$element());
-    }
+// class ToolbarModel {
+//     get currentView() {
+//         return this._currentView;
+//     }
+//     set currentView(value) {
+//         this._currentView = value;
+//         this.raiseEvent(EVENT_NAMES.CURRENT_VIEW_CHANGED);
+//     }
 
-    _renderViewSwitcher() {
-        this._validateViews();
+//     get views() {
+//         return this._views;
+//     }
+//     set views(value) {
+//         this._views = value;
+//         this.raiseEvent(EVENT_NAMES.VIEWS_CHANGED);
+//     }
 
-        const $viewSwitcher = $('<div>').addClass(VIEW_SWITCHER_CLASS).appendTo(this.$element());
-        this.option('useDropDownViewSwitcher') ? this._renderViewSwitcherDropDownMenu($viewSwitcher) : this._renderViewSwitcherTabs($viewSwitcher);
-    }
+//     get useDropDownViewSwitcher() {
+//         return this._useDropDownViewSwitcher;
+//     }
+//     set useDropDownViewSwitcher(value) {
+//         this._useDropDownViewSwitcher = value;
+//         this.raiseEvent(EVENT_NAMES.USE_DROP_DOWN_VIEW_SWITCHER);
+//     }
 
-    _validateViews() {
-        const views = this.option('views');
+//     get tabIndex() {
+//         return this._tabIndex;
+//     }
+//     set tabIndex(value) {
+//         this._tabIndex = value;
+//         this.raiseEvent(EVENT_NAMES.TAB_INDEX_CHANGED);
+//     }
 
-        each(views, function(_, view) {
-            const isViewIsObject = isObject(view);
-            const viewType = isViewIsObject && view.type ? view.type : view;
+//     constructor(views, currentView, tabIndex, useDropDownViewSwitcher) {
+//         this._views = views;
+//         this._currentView = currentView;
+//         this._tabIndex = tabIndex;
+//         this._useDropDownViewSwitcher = useDropDownViewSwitcher;
 
-            if(inArray(viewType, VIEWS) === -1) {
-                errors.log('W0008', viewType);
-            }
-        });
-    }
+//         this.eventEmitter = new Map();
+//     }
 
-    _getCurrentViewType() {
-        const currentView = this.option('currentView');
-        return currentView.type || currentView;
-    }
+//     on(eventName, callBack) {
+//         this.eventEmitter.set(eventName, callBack);
+//         return this;
+//     }
 
-    _renderViewSwitcherTabs($element) {
-        const that = this;
+//     raiseEvent(eventName) {
+//         const callBack = this.eventEmitter.get(eventName);
+//         callBack && callBack(eventName);
+//     }
+// }
 
-        $element.addClass(TABS_EXPANDED_CLASS);
+// class ViewRender {
+//     render() {
+//     }
 
-        this._viewSwitcher = this._createComponent($element, Tabs, {
-            selectionRequired: true,
-            scrollingEnabled: true,
-            onSelectionChanged: this._updateCurrentView.bind(this),
-            items: this.option('views'),
-            itemTemplate: function(item) {
-                return $('<span>')
-                    .addClass('dx-tab-text')
-                    .text(that._getItemText(item));
-            },
-            selectedItem: this.option('currentView'),
-            tabIndex: this.option('tabIndex'),
-            focusStateEnabled: this.option('focusStateEnabled')
-        });
-    }
+//     dispose() {
+//     }
+// }
 
-    _getItemText(item) {
-        return item.name || messageLocalization.format('dxScheduler-switcher' + camelize(item.type || item, true));
-    }
+// class ToolbarView extends ViewRender {
+//     constructor(model, createComponent, container) {
+//         super();
+//         this.model = model;
 
-    _refreshViewSwitcher() {
-        this._viewSwitcher._dispose();
-        this._viewSwitcher.$element().remove();
+//         this.model.on(EVENT_NAMES.CURRENT_VIEW_CHANGED, () => this.render());
+//         this.model.on(EVENT_NAMES.USE_DROP_DOWN_VIEW_SWITCHER, () => this.renderItems());
 
-        delete this._viewSwitcher;
+//         this.createComponent = createComponent;
+//         this.container = container;
 
-        this._removeViewSwitcherLabel();
+//         this.toolbar = undefined;
+//         this.navigatorView = undefined;
+//         this.viewSwitcherView = undefined;
+//     }
 
-        this._renderViewSwitcher();
-    }
+//     render() {
+//         if(!this.toolbar) {
+//             this.toolbar = this.createComponent(this.container, Toolbar, {}); // TODO
+//         }
 
-    _removeViewSwitcherLabel() {
-        if(isDefined(this._$viewSwitcherLabel)) {
-            this._$viewSwitcherLabel.detach();
-            this._$viewSwitcherLabel.remove();
+//         this.toolbar.option('tabIndex', this.model.tabIndex);
+//         this.renderItems();
+//     }
 
-            delete this._$viewSwitcherLabel;
-        }
-    }
+//     renderItems() {
+//         this.navigatorView?.dispose();
+//         this.viewSwitcherView?.dispose();
 
-    _renderViewSwitcherDropDownMenu($element) {
-        const that = this;
+//         this.navigatorView = new NavigatorView(this.model);
+//         this.viewSwitcherView = this.model.useDropDownViewSwitcher ?
+//             new DropDownViewSwitcherView(this.model) :
+//             new ViewSwitcherView(this.model);
 
-        this._$viewSwitcherLabel = $('<div>').addClass(VIEW_SWITCHER_LABEL_CLASS).appendTo(this.$element());
+//         let items = [];
+//         items = items.concat(this.navigatorView.render());
+//         items = items.concat(this.viewSwitcherView.render());
 
-        this._changeViewSwitcherLabelText();
+//         this.toolbar.option({ items });
+//     }
 
-        this._viewSwitcher = this._createComponent($element, DropDownMenu, {
-            onItemClick: this._updateCurrentView.bind(this),
-            buttonIcon: this.option('_dropDownButtonIcon'),
-            items: this.option('views'),
-            selectionMode: this.option('isAdaptive') ? 'single' : 'none',
-            selectedItemKeys: [this.option('currentView')],
-            itemTemplate: function(item) {
-                return $('<span>')
-                    .addClass('dx-dropdownmenu-item-text')
-                    .text(that._getItemText(item));
-            }
-        });
-    }
+//     dispose() {
+//     }
+// }
 
-    _changeViewSwitcherLabelText() {
-        if(!isDefined(this._$viewSwitcherLabel)) {
-            return;
-        }
-        const currentView = this.option('currentView');
-        const currentViewText = this._getItemText(currentView);
+// class ViewSwitcherView extends ViewRender {
+//     constructor(model) {
+//         super();
+//     }
+// }
 
-        this._$viewSwitcherLabel.text(currentViewText);
-    }
+// class DropDownViewSwitcherView extends ViewSwitcherView {
+//     constructor(model) {
+//         super(model);
+//     }
+// }
 
-    _getCurrentViewName(currentView) {
-        return isObject(currentView) ? currentView.name || currentView.type : currentView;
-    }
+// class NavigatorView {
+//     constructor(model) {
 
-    _updateCurrentView(e) {
-        const selectedItem = e.itemData || e.component.option('selectedItem');
+//     }
+// }
 
-        const viewName = this._getCurrentViewName(selectedItem);
+// class ToolbarController {
+//     constructor(model, view) {
+//         this.model = model;
+//     }
 
-        this.notifyObserver('currentViewUpdated', viewName);
-    }
+//     setCurrentView(value) {
+//         this.model.currentView = value;
+//     }
 
-    _renderFocusTarget() {}
+//     setViews(value) {
+//         this.model.views = value;
+//     }
 
-    notifyObserver(subject, args) {
-        const observer = this.option('observer');
-        if(observer) {
-            observer.fire(subject, args);
-        }
-    }
+//     setUseDropDownViewSwitcher(value) {
+//         this.model.useDropDownViewSwitcher = value;
+//     }
 
-    invoke() {
-        const observer = this.option('observer');
+//     setTabIndex(value) {
+//         this.model.tabIndex = value;
+//     }
+// }
 
-        if(observer) {
-            return observer.fire.apply(observer, arguments);
-        }
-    }
-}
+// export class Header extends Widget {
+//     _getDefaultOptions() {
+//         return extend(super._getDefaultOptions(), {
+//             views: [],
+//             isAdaptive: false,
+//             intervalCount: 1,
+//             currentView: 'day',
+//             firstDayOfWeek: undefined,
+//             currentDate: new Date(),
+//             min: undefined,
+//             max: undefined,
+//             useDropDownViewSwitcher: false,
+//             _dropDownButtonIcon: 'overlay' // TODO
+//         });
+//     }
 
-registerComponent('dxSchedulerHeader', Header);
+//     _setOptionsByReference() {
+//         super._setOptionsByReference();
+
+//         extend(this._optionsByReference, {
+//             currentView: true
+//         });
+//     }
+
+//     _optionChanged(args) {
+//         const value = args.value;
+
+//         switch(args.name) {
+//             case 'views':
+//                 this._validateViews();
+
+//                 // TODO
+//                 // this._viewSwitcher.option({
+//                 //     items: value,
+//                 //     selectedItem: this.option('currentView')
+//                 // });
+//                 break;
+//             case 'customizeDateNavigatorText':
+//                 this._navigator.option(args.name, value);
+//                 break;
+//             case 'currentView':
+//                 // this._viewSwitcher.option('selectedItem', value); //TODO
+//                 this._navigator.option('step', STEP_MAP[this._getCurrentViewType()]);
+//                 this._changeViewSwitcherLabelText();
+//                 break;
+//             case 'currentDate':
+//                 this._navigator.option('date', value);
+//                 break;
+//             case 'displayedDate':
+//                 this._navigator.option('displayedDate', value);
+//                 break;
+//             case 'min':
+//             case 'max':
+//             case 'firstDayOfWeek':
+//             case 'intervalCount':
+//                 this._navigator.option(args.name, value);
+//                 break;
+//             case 'tabIndex':
+//             case 'focusStateEnabled':
+//                 // this._viewSwitcher.option(args.name, value); //TODO
+//                 this._navigator.option(args.name, value);
+//                 super._optionChanged(args);
+//                 break;
+//             case 'useDropDownViewSwitcher':
+//                 // this._refreshViewSwitcher(); // TODO
+//                 break;
+//             default:
+//                 super._optionChanged(args);
+//         }
+//     }
+
+//     _init() {
+//         super._init();
+//         this.$element().addClass(COMPONENT_CLASS);
+//     }
+
+//     _initMarkup() {
+//         super._initMarkup();
+//         this._createToolbar();
+//     }
+
+//     _createToolbar() {
+//         this._viewSwitcher = this._createComponent(this.$element(), Toolbar, {
+//             items: [
+//                 this._createNavigatorItem(),
+//                 this._createViewButtonGroupItem()
+//             ],
+//             tabIndex: this.option('tabIndex')
+//         });
+//     }
+
+//     _createViewButtonGroupItem() {
+//         const items = this.option('views').map(viewName => {
+//             return {
+//                 key: viewName,
+//                 text: _getItemText(viewName)
+//             };
+//         });
+
+//         return {
+//             location: 'after',
+//             widget: 'dxButtonGroup',
+//             locateInMenu: 'auto',
+//             // locateInMenu: 'always',
+//             options: {
+//                 keyExpr: 'key',
+//                 items: items,
+//                 selectedItemKeys: [this.option('currentView')],
+//                 focusStateEnabled: this.option('focusStateEnabled'),
+
+//                 onItemClick: e => this.notifyObserver('currentViewUpdated', e.itemData.key)
+//             }
+//         };
+//     }
+
+//     _createNavigatorItem() {
+//         return {
+//             location: 'before',
+//             locateInMenu: 'never',
+//             template: () => {
+//                 this._navigator = this._createNavigator();
+//                 return this._navigator.$element();
+//             }
+//         };
+//     }
+
+//     _createNavigator() {
+//         return this._createComponent('<div>', Navigator, {
+//             min: this.option('min'),
+//             max: this.option('max'),
+//             intervalCount: this.option('intervalCount'),
+//             date: this.option('currentDate'),
+//             step: STEP_MAP[this._getCurrentViewType()],
+//             firstDayOfWeek: this.option('firstDayOfWeek'),
+//             tabIndex: this.option('tabIndex'),
+//             focusStateEnabled: this.option('focusStateEnabled'),
+//             observer: this.option('observer'),
+//             customizeDateNavigatorText: this.option('customizeDateNavigatorText'),
+//             todayDate: this.option('todayDate')
+//         });
+//     }
+
+//     _validateViews() {
+//         const views = this.option('views');
+
+//         views.forEach(view => {
+//             const isViewIsObject = isObject(view);
+//             const viewType = isViewIsObject && view.type ? view.type : view;
+
+//             if(inArray(viewType, VIEWS) === -1) {
+//                 errors.log('W0008', viewType);
+//             }
+//         });
+//     }
+
+//     _getCurrentViewType() {
+//         const currentView = this.option('currentView');
+//         return currentView.type || currentView;
+//     }
+
+//     // _refreshViewSwitcher() {
+//     //     this._viewSwitcher._dispose();
+//     //     this._viewSwitcher.$element().remove();
+
+//     //     delete this._viewSwitcher;
+
+//     //     this._removeViewSwitcherLabel();
+
+//     //     this._renderViewSwitcher();
+//     // }
+
+//     _removeViewSwitcherLabel() {
+//         if(isDefined(this._$viewSwitcherLabel)) {
+//             this._$viewSwitcherLabel.detach();
+//             this._$viewSwitcherLabel.remove();
+
+//             delete this._$viewSwitcherLabel;
+//         }
+//     }
+
+//     _changeViewSwitcherLabelText() {
+//         if(!isDefined(this._$viewSwitcherLabel)) {
+//             return;
+//         }
+//         const currentView = this.option('currentView');
+//         const currentViewText = _getItemText(currentView);
+
+//         this._$viewSwitcherLabel.text(currentViewText);
+//     }
+
+//     _getCurrentViewName(currentView) {
+//         return isObject(currentView) ? currentView.name || currentView.type : currentView;
+//     }
+
+//     _renderFocusTarget() {}
+
+//     notifyObserver(subject, args) {
+//         const observer = this.option('observer');
+//         if(observer) {
+//             observer.fire(subject, args);
+//         }
+//     }
+
+//     invoke() {
+//         const observer = this.option('observer');
+
+//         if(observer) {
+//             return observer.fire.apply(observer, arguments);
+//         }
+//     }
+// }
+
+// registerComponent('dxSchedulerHeader', Header);
